@@ -1,0 +1,104 @@
+crud operations
+
+1. create a main.py file in generally
+	from fastapi import FastAPI
+==>app =FastAPI()
+
+@app.get("/")
+def read_somthing() : 
+    return {"msg":"hello world"}
+
+2. create some folder named config, models, router,schemas	
+then 3. create a db.py file in config folder 
+==>from sqlalchemy import create_engine,MetaData
+
+engine= create_engine("sqlite:///name.db")
+meta=MetaData()
+conn =engine.connect() 
+4. create user.py in schemas in there 
+==>from pydentic import basemodel;
+
+class User(basemodel):
+    id:int
+    name : str
+    email : str
+    password : str  
+5.then create another user.py in models file 
+==>from sqlalchemy import Table,Column
+from configue.db import meta
+
+user=Table(
+    'user',meta,
+    Column('id',int,primary_key= True),
+    Column('name',str(255)),
+    Column('email',str(255)),
+    Column('password',str(255))
+)
+6. in model file create a index.py file 
+==>from models.user import user  
+
+
+7. then after create third user.py in routes folder 
+	from fastapi import APIRouter
+from configue.db import conn
+from models.index import user
+user=APIRouter()
+
+@user.get("/")
+async def read_data():
+    return conn.execute(user.select()).fetchall()
+
+@user.get("/{id}") ----> for get (read the data)
+async def read_data(id:int):
+    return conn.execute(user.select(user.c.id == id)).fetchall()
+
+@user.post("/") -----> for post(write the data)
+async def write_data():
+    return conn.execute(user.insert().values(
+        name=user.name,
+        email=user.email,
+        password=user.password
+
+    )).fetchall()
+
+8. remove the fatchall from post API and also remove the return keyword but in place of that at ==>  async def write_data(): added user: User and import schemas. index import user
+9. now create a new file in the schemas folder named index.py
+  -in the index.py(schemas) ==> from schemas.user import User
+10.user.py(Routes)
+  - @user.post("/{id}") -----> for put(update the data)
+async def write_data(id:int ,user:User):
+    return conn.execute(user.update().values(
+        name=user.name,
+        email=user.email,
+        password=user.password
+
+    )).fetchall()
+
+11.add new oprations like update and delete 
+==> @user.put("/{id}")
+async def update_data(id :int,user:User):
+    conn.execute(user.update(
+          name=user.name,
+          email=user.email,
+          password=user.password
+    ).where(user.c.id == id))
+    return conn.execute(user.select()).fetchall()
+
+@user.delete("/")
+async def read_data():
+    conn.execute(user.delete().where(user.c.id == id))
+    return conn.execute(user.select()).fetchall()
+
+12. create an index.py file in the model folder and import the file
+==> from models.user import user  
+
+
+13. create an index.py file in routes folder
+==>from routes.user import user
+
+14. convert the main.py file in the following formate
+==>from fastapi import FastAPI
+from routes.index import user
+app =FastAPI()
+
+app.include_router(user)

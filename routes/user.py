@@ -4,14 +4,11 @@ from models.index import users
 from schemas.index import User
 user= APIRouter()
 
-# in crud oprations 
-# create data
 @user.get("/")
 async def read_data():
     return conn.execute(users.select()).fetchall()
 
 
-# read the data
 @user.get("/{id}")
 async def read_data(id:int):
     return conn.execute(users.select().where(users.c.id == id)).fetchall()
@@ -25,7 +22,6 @@ async def write_data(user:User):
     ))
     return conn.execute(users.select()).fetchall()
 
-# update the data
 @user.put("/{id}")
 async def update_data(id:int,user:User):
     conn.execute(users.update().values(
@@ -35,7 +31,6 @@ async def update_data(id:int,user:User):
     ).where(users.c.id == id))
     return conn.execute(users.select()).fetchall()
 
-# delete the data
 @user.delete("/")
 async def delete_data():
     conn.execute(users.delete().where(users.c.id == id))
